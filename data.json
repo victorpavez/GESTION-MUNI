@@ -1,0 +1,122 @@
+{
+    "kpis": [],
+    "proyectos": [
+      {
+        "id": "PROY-001",
+        "nombre": "Proyecto 1",
+        "tipo": "Pavimento",
+        "financiamiento": "Municipal",
+        "fechaComienzo": "2025-01-02",
+        "asignado": "tecnico2@gmail.com",
+        "prioridad": "Alta",
+        "etapaActual": "Planos",
+        "estado": "En curso",
+        "avanceFisico": 77,
+        "avanceFinanciero": 29,
+        "fechaFinEstimada": "2025-01-20",
+        "responsableTecnico": "resp1@gmail.com",
+        "factibilidadTecnica": {
+          "check": true,
+          "fechaInicioEstimada": "2025-01-18",
+          "fechaFinalEstimada": "2025-01-27",
+          "fechaInicioReal": "2025-01-31",
+          "fechaFinalReal": "2025-01-05",
+          "validadoPor": "jefearea@gmail.com"
+        },
+        "planos": {
+          "check": false,
+          "fechaInicioEstimada": "2025-01-01",
+          "fechaFinalEstimada": "2025-01-04",
+          "fechaInicioReal": "2025-01-18",
+          "fechaFinalReal": "2025-01-11",
+          "validadoPor": "jefearea@gmail.com"
+        },
+        "computoPresupuesto": {
+          "check": true,
+          "fechaInicioEstimada": "2025-01-13",
+          "fechaFinalEstimada": "2025-01-07",
+          "fechaInicioReal": "2025-01-14",
+          "fechaFinalReal": "2025-01-22",
+          "validadoPor": "jefearea@gmail.com"
+        }
+      },
+      {
+        "id": "PROY-002",
+        "nombre": "Proyecto 2",
+        "tipo": "Red de Agua",
+        "financiamiento": "Municipal",
+        "fechaComienzo": "2025-01-01",
+        "asignado": "tecnico1@gmail.com",
+        "prioridad": "Alta",
+        "etapaActual": "Planos",
+        "estado": "Finalizado",
+        "avanceFisico": 81,
+        "avanceFinanciero": 27,
+        "fechaFinEstimada": "2025-02-17",
+        "responsableTecnico": "resp2@gmail.com",
+        "factibilidadTecnica": {
+          "check": false,
+          "fechaInicioEstimada": "2025-01-26",
+          "fechaFinalEstimada": "2025-01-10",
+          "fechaInicioReal": "2025-01-13",
+          "fechaFinalReal": "2025-01-24",
+          "validadoPor": "jefearea@gmail.com"
+        },
+        "planos": {
+          "check": false,
+          "fechaInicioEstimada": "2025-01-27",
+          "fechaFinalEstimada": "2025-01-02",
+          "fechaInicioReal": "2025-01-15",
+          "fechaFinalReal": "2025-01-13",
+          "validadoPor": "jefearea@gmail.com"
+        },
+        "computoPresupuesto": {
+          "check": false,
+          "fechaInicioEstimada": "2025-01-10",
+          "fechaFinalEstimada": "2025-01-14",
+          "fechaInicioReal": "2025-01-22",
+          "fechaFinalReal": "2025-01-03",
+          "validadoPor": "jefearea@gmail.com"
+        }
+      },
+      {
+        "id": "PROY-003",
+        "nombre": "Proyecto 3",
+        "tipo": "Pavimento",
+        "financiamiento": "Municipal",
+        "fechaComienzo": "2025-01-03",
+        "asignado": "tecnico1@gmail.com",
+        "prioridad": "Media",
+        "etapaActual": "Planos",
+        "estado": "Finalizado",
+        "avanceFisico": 91,
+        "avanceFinanciero": 33,
+        "fechaFinEstimada": "2025-01-13",
+        "responsableTecnico": "resp1@gmail.com",
+        "factibilidadTecnica": {
+          "check": true,
+          "fechaInicioEstimada": "2025-01-23",
+          "fechaFinalEstimada": "2025-01-03",
+          "fechaInicioReal": "2025-01-13",
+          "fechaFinalReal": "2025-01-20",
+          "validadoPor": "jefearea@gmail.com"
+        },
+        "planos": {
+          "check": false,
+          "fechaInicioEstimada": "2025-01-13",
+          "fechaFinalEstimada": "2025-01-10",
+          "fechaInicioReal": "2025-01-06",
+          "fechaFinalReal": "2025-01-31",
+          "validadoPor": "jefearea@gmail.com"
+        },
+        "computoPresupuesto": {
+          "check": true,
+          "fechaInicioEstimada": "2025-01-04",
+          "fechaFinalEstimada": "2025-01-10",
+          "fechaInicioReal": "2025-01-05",
+          "fechaFinalReal": "2025-01-01",
+          "validadoPor": "jefearea@gmail.com"
+        }
+      }
+    ]
+  }

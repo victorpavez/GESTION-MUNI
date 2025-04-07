@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Proyectos Disponibles</title>
+  <link rel="stylesheet" href="../css/estilos.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+  <script>
+    const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTihqbl1oVVb843wxW0VY-2QddNOV1xul_UIoXh79IciRRktrhECgyvXAGsoSDQiP4KHkUthDWzTtQb/pub?output=csv';
+
+    let proyectos = [];
+
+    async function cargarDatosDesdeCSV() {
+      try {
+        console.log("🚀 Página cargada correctamente: proyecto.html");
+        const respuesta = await fetch(urlCSV);
+        if (!respuesta.ok) throw new Error('Error HTTP: ' + respuesta.status);
+
+        const texto = await respuesta.text();
+        Papa.parse(texto, {
+          header: false,
+          skipEmptyLines: true,
+          complete: function(results) {
+            const datos = results.data.slice(3);
+            proyectos = datos.map(columnas => ({
+              id: columnas[0]?.trim(),
+              nombre: columnas[1]?.trim(),
+              tipo: columnas[2]?.trim(),
+              asignado: columnas[10]?.trim()
+            })).filter(p => p.id && p.nombre);
+
+            console.log("✅ Proyectos cargados:", proyectos);
+            llenarSelectAsignado();
+            renderizarTabla(proyectos);
+          }
+        });
+      } catch (err) {
+        console.error('Error al cargar CSV:', err);
+        alert('Hubo un error al cargar los datos del CSV. Revisá la consola para más detalles.');
+      }
+    }
+
+    function llenarSelectAsignado() {
+      const select = document.getElementById('filtroAsignado');
+      const asignadosUnicos = [...new Set(proyectos.map(p => p.asignado).filter(Boolean))];
+      asignadosUnicos.sort().forEach(nombre => {
+        const option = document.createElement('option');
+        option.value = nombre;
+        option.textContent = nombre;
+        select.appendChild(option);
+      });
+    }
+
+    function renderizarTabla(lista) {
+      const tbody = document.querySelector('#tablaProyectos tbody');
+      tbody.innerHTML = '';
+
+      lista.forEach(p => {
+        const fila = document.createElement('tr');
+        fila.style.cursor = 'pointer';
+        fila.onclick = () => {
+          window.location.href = `detalle.html?id=${encodeURIComponent(p.id)}`;
+        };
+        fila.innerHTML = `
+          <td>${p.id}</td>
+          <td>${p.nombre}</td>
+          <td>${p.tipo}</td>
+          <td>${p.asignado || '-'}</td>
+          <td><button class="btn btn-sm btn-primary">Ver</button></td>
+        `;
+        tbody.appendChild(fila);
+      });
+    }
+
+    function filtrarProyectos() {
+      const textoBusqueda = document.getElementById('buscador').value.toLowerCase();
+      const filtroAsignado = document.getElementById('filtroAsignado').value;
+      const filtrados = proyectos.filter(p => {
+        const coincideBusqueda =
+          p.id.toLowerCase().includes(textoBusqueda) ||
+          p.nombre.toLowerCase().includes(textoBusqueda);
+        const coincideAsignado = filtroAsignado === '' || p.asignado === filtroAsignado;
+        return coincideBusqueda && coincideAsignado;
+      });
+      renderizarTabla(filtrados);
+    }
+
+    document.addEventListener("DOMContentLoaded", cargarDatosDesdeCSV);
+  </script>
+</head>
+<body class="hold-transition sidebar-mini">
+<div class="wrapper">
+  <section class="content-header">
+    <div class="container-fluid">
+      <div class="row mb-2">
+        <div class="col-sm-6">
+          <h1><i class="fas fa-project-diagram"></i> Gestión de Proyectos</h1>
+        </div>
+      </div>
+    </div>
+  </section>
+  <section class="content">
+    <div class="container-fluid">
+      <label for="filtroAsignado">Filtrar por asignado:</label>
+      <select id="filtroAsignado" onchange="filtrarProyectos()">
+        <option value="">Todos</option>
+      </select>
+      <input type="text" id="buscador" placeholder="Buscar por nombre o ID..." oninput="filtrarProyectos()" />
+      <table id="tablaProyectos" class="table table-bordered table-hover">
+        <thead>
+          <tr>
+            <th>ID Proyecto</th>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Asignado</th>
+            <th>Acción</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </section>
+</div>
+</body>
+</html>

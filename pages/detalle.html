@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Detalle del Proyecto</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background-color: #f4f6f9;
+    }
+    .main-container {
+      max-width: 1080px;
+      margin: 40px auto;
+      padding: 30px;
+    }
+    .card {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      border-radius: 12px;
+      margin-bottom: 40px;
+    }
+    .card-header {
+      border-bottom: 1px solid rgba(255,255,255,0.2);
+    }
+    .barra-progreso {
+      background: #dee2e6;
+      border-radius: 30px;
+      overflow: hidden;
+      height: 30px;
+      margin-top: 20px;
+    }
+    .progreso-interno {
+      height: 100%;
+      background: linear-gradient(90deg, #007bff, #00c6ff);
+      text-align: center;
+      color: white;
+      line-height: 30px;
+      font-weight: bold;
+      transition: width 0.5s ease-in-out;
+    }
+    .etapa-nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 30px 0 20px;
+    }
+    .estado-etapa {
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 600;
+      display: inline-block;
+      text-transform: uppercase;
+    }
+    .aprobado {
+      background-color: #28a745;
+      color: white;
+    }
+    .pendiente {
+      background-color: #ffc107;
+      color: black;
+    }
+    .acciones-etapa {
+      margin-top: 30px;
+      padding: 20px;
+      background: #f1f1f1;
+      border-radius: 10px;
+    }
+    .acciones-etapa h5 {
+      margin-bottom: 15px;
+    }
+    .documentacion {
+      padding: 20px;
+      background: #fff3cd;
+      border-left: 6px solid #ffc107;
+      border-radius: 10px;
+      margin-top: 40px;
+    }
+    .btn i {
+      margin-right: 6px;
+    }
+    a {
+      color: #007bff;
+      text-decoration: none;
+      font-weight: 500;
+      display: inline-block;
+      margin-bottom: 20px;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .info p {
+      margin-bottom: 6px;
+    }
+  </style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.css">
+</head>
+<body>
+  <div class="main-container">
+    <a href="proyecto.html"><i class="fas fa-arrow-left"></i> Volver a la lista</a>
+    <div id="contenido">
+      <div class="card">
+        <div class="card-body text-center text-muted">
+          <i class="fas fa-spinner fa-spin"></i> Cargando proyecto...
+        </div>
+      </div>
+    </div>
+    <div id="seccion-documentacion" class="documentacion" style="display:none;">
+      <h5><i class="fas fa-folder-open"></i> Documentación del proyecto</h5>
+      <p>Acá se puede agregar enlaces a planos, presupuestos, memorias o cualquier archivo importante relacionado al proyecto.</p>
+      <ul id="lista-documentos">
+        <li><a href="#">📄 Plano general.dwg</a></li>
+        <li><a href="#">📄 Presupuesto.pdf</a></li>
+        <li><a href="#">📄 Memoria Técnica.docx</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script>
+  // Utilidad para convertir letras de columna tipo 'AC' a índice numérico (0-based)
+  Papa.Utilities = {
+    lettersToNumbers: function(letters) {
+      let num = 0;
+      for (let i = 0; i < letters.length; i++) {
+        num = num * 26 + (letters.charCodeAt(i) - 64);
+      }
+      return num - 1;
+    }
+  };
+</script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script>
+    // Código principal para cargar y renderizar el detalle del proyecto
+    const urlCSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTihqbl1oVVb843wxW0VY-2QddNOV1xul_UIoXh79IciRRktrhECgyvXAGsoSDQiP4KHkUthDWzTtQb/pub?output=csv';
+    const urlScript = 'https://script.google.com/macros/s/AKfycby9c0NbMnms6cxXsUmq68l7QfnLiKHXkU_ystrvW_Zv4KTJLped3x9-1yUZ3rEUBjY/exec';
+    const columnasEtapa = {
+      "ASIGNADO": { solicitud: "P", aprobacion: "Q" },
+      "FACTIBILIDAD TECNICA": { solicitud: "R", aprobacion: "S" },
+      "PLANOS": { solicitud: "AC", aprobacion: "AD" },
+      "COMPUTO Y PRESUPUESTO": { solicitud: "AK", aprobacion: "AL" },
+      "MEMORIA": { solicitud: "AS", aprobacion: "AT" },
+      "PLIEGO": { solicitud: "BA", aprobacion: "BB" },
+      "APROBACION ECONOMICA": { solicitud: "BI", aprobacion: "BJ" },
+      "IMUH": { solicitud: "BQ", aprobacion: "BR" },
+      "REGISTRO DE OPOSICION": { solicitud: "BY", aprobacion: "BZ" },
+      "PRENSA": { solicitud: "CG", aprobacion: "CH" },
+      "LEGALES": { solicitud: "CO", aprobacion: "CP" },
+      "CONTRATACIONES": { solicitud: "CW", aprobacion: "CX" },
+      "COMIENZO DE OBRA": { solicitud: "DE", aprobacion: "DF" }
+    };
+
+    const etapas = [
+      "FACTIBILIDAD TECNICA", "PLANOS", "COMPUTO Y PRESUPUESTO", "MEMORIA", "PLIEGO",
+      "APROBACION ECONOMICA", "IMUH", "REGISTRO DE OPOSICION", "PRENSA", "LEGALES",
+      "CONTRATACIONES", "COMIENZO DE OBRA"
+    ];
+
+    const rolUsuario = 'jefe_tecnico';
+    let proyecto = null;
+let filaProyecto = null;
+
+    function obtenerParametro(nombre) {
+      const params = new URLSearchParams(window.location.search);
+      return params.get(nombre);
+    }
+
+    async function cargarDetalle() {
+      const idBuscado = obtenerParametro('id');
+      if (!idBuscado) {
+        document.getElementById('contenido').innerHTML = '<p>No se proporcionó ID de proyecto.</p>';
+        return;
+      }
+
+      const respuesta = await fetch(urlCSV);
+      const texto = await respuesta.text();
+      Papa.parse(texto, {
+        header: false,
+        skipEmptyLines: true,
+        complete: function(result) {
+          const filas = result.data.slice(3);
+          filas.forEach(cols => {
+            if (cols[0]?.trim() === idBuscado) {
+              filaProyecto = cols;
+              proyecto = {
+                id: cols[0]?.trim(),
+                nombre: cols[1]?.trim(),
+                tipo: cols[2]?.trim(),
+                asignado: cols[10]?.trim(),
+                etapa: cols[8]?.trim(),
+                prioridad: cols[7]?.trim(),
+                supervisor: cols[11]?.trim(),
+                comentarios: cols[14]?.trim(),
+                estado: cols[9]?.trim() || 'PENDIENTE'
+              };
+            }
+          });
+
+          if (!proyecto) {
+            document.getElementById('contenido').innerHTML = '<p>No se encontró el proyecto.</p>';
+            return;
+          }
+
+          renderizarDetalle();
+        }
+      });
+    }
+
+    // Mostrar documentación y renderizar el detalle completo
+    function renderizarDetalle() {
+  const etapaActual = (proyecto.etapa || '').toUpperCase();
+  const etapaIndex = etapas.indexOf(etapaActual);
+  const porcentaje = etapaIndex >= 0 ? Math.round(((etapaIndex + 1) / etapas.length) * 100) : 0;
+  let acciones = '';
+  let puedeAvanzar = proyecto.estado.toUpperCase() === 'APROBADO' || etapaActual === 'ASIGNADO';
+
+  if (columnasEtapa[etapaActual]) {
+    if (rolUsuario === 'tecnico') {
+      if (proyecto.estado.toUpperCase() === 'SOLICITADO') {
+        acciones = `<span class='badge badge-warning'>Ya solicitado</span>`;
+      } else {
+        acciones = `<button class='btn btn-warning' onclick='solicitarAprobacion(this)'><i class='fas fa-paper-plane'></i>Solicitar aprobación</button>`;
+      }
+    } else if (rolUsuario === 'jefe_tecnico' || rolUsuario === 'jefe_area') {
+      const colAprobacion = columnasEtapa[etapaActual]?.aprobacion;
+      const indiceCol = colAprobacion ? Papa.Utilities.lettersToNumbers(colAprobacion) : -1;
+      const yaAprobado = filaProyecto && filaProyecto[indiceCol]?.toUpperCase() === 'APROBADO';
+
+      if (yaAprobado) {
+        acciones = `<span class='badge badge-success'>Etapa ya aprobada</span>`;
+      } else {
+        acciones = `<button class='btn btn-success' onclick='aprobarEtapa(this)'><i class='fas fa-check'></i>Aprobar etapa</button>`;
+      }
+    }
+  }
+
+  const estadoClase = proyecto.estado.toUpperCase() === 'APROBADO' ? 'aprobado' : 'pendiente';
+  const estadoTexto = proyecto.estado.toUpperCase() === 'APROBADO' ? 'APROBADO ✅' : 'PENDIENTE ⏳';
+
+  document.getElementById('contenido').innerHTML = `
+    <div class='card'>
+      <div class='card-header bg-primary text-white d-flex justify-content-between align-items-center'>
+        <h3 class='card-title mb-0'>${proyecto.nombre}</h3>
+        <span class='estado-etapa ${estadoClase}'>${estadoTexto}</span>
+      </div>
+      <div class='card-body'>
+        <div class='info'>
+          <p><strong>ID:</strong> ${proyecto.id}</p>
+          <p><strong>Tipo:</strong> ${proyecto.tipo}</p>
+          <p><strong>Asignado a:</strong> ${proyecto.asignado}</p>
+          <p><strong>Supervisor:</strong> ${proyecto.supervisor}</p>
+          <p><strong>Prioridad:</strong> ${proyecto.prioridad}</p>
+        </div>
+
+        <div class='etapa-nav'>
+          <button class='btn btn-outline-primary' onclick='cambiarEtapa(-1)'><i class='fas fa-chevron-left'></i> Anterior</button>
+          <h5 class='mb-0'>Etapa actual: <span id='nombreEtapa'>${proyecto.etapa}</span></h5>
+          <button class='btn btn-outline-primary' onclick='cambiarEtapa(1)' ${!puedeAvanzar ? 'disabled' : ''}>Siguiente <i class='fas fa-chevron-right'></i></button>
+        </div>
+
+        <div class='barra-progreso'>
+          <div class='progreso-interno' style='width: ${porcentaje}%; white-space: nowrap;'>
+            ${etapas.slice(0, etapaIndex + 1).map((etapa, i) => {
+              const colAprob = columnasEtapa[etapa]?.aprobacion;
+              const colIndex = colAprob ? Papa.Utilities.lettersToNumbers(colAprob) : -1;
+              const aprobado = filaProyecto?.[colIndex]?.toUpperCase() === 'APROBADO';
+              const simbolo = aprobado ? '✅' : '⬜';
+              return `<span title='${etapa}'>${simbolo}</span>`;
+            }).join(' ')} ${porcentaje}%
+          </div>
+        </div>
+
+        <div class='mt-4'>
+          <h5>Comentarios</h5>
+          <p>${proyecto.comentarios || 'Sin comentarios.'}</p>
+        </div>
+
+        <div class='acciones-etapa'>
+          <h5>Acciones disponibles:</h5>
+          ${acciones || '<p>No hay acciones disponibles para esta etapa.</p>'}
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Mostrar sección de documentación
+  document.getElementById("seccion-documentacion").style.display = "block";
+}
+
+function cambiarEtapa(direccion) {
+  const actual = (proyecto.etapa || '').toUpperCase();
+  let index = etapas.indexOf(actual);
+  index += direccion;
+  if (index >= 0 && index < etapas.length) {
+    proyecto.etapa = etapas[index];
+    proyecto.estado = 'PENDIENTE';
+
+    fetch(urlScript, {
+      method: "POST",
+      mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: proyecto.id,
+        estado: proyecto.etapa,
+        columna: "I"
+      })
+    });
+
+    toastr.info(`Etapa cambiada a: ${proyecto.etapa}`, "Cambio de etapa");
+    renderizarDetalle();
+  }
+}
+
+document.addEventListener('DOMContentLoaded', cargarDetalle);
+  </script>
+  <script>
+    function aprobarEtapa(btn) {
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Aprobando...';
+      const etapaActual = (proyecto.etapa || '').toUpperCase();
+      const col = columnasEtapa[etapaActual]?.aprobacion || 'T';
+
+      fetch(urlScript, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: proyecto.id,
+          estado: "APROBADO",
+          columna: col
+        })
+      });
+
+      toastr.success("Etapa aprobada correctamente ✅", "Aprobación enviada");
+      proyecto.estado = "APROBADO";
+      renderizarDetalle();
+    }
+
+    function solicitarAprobacion(btn) {
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Enviando...';
+      const etapaActual = (proyecto.etapa || '').toUpperCase();
+      const col = columnasEtapa[etapaActual]?.solicitud || 'S';
+
+      fetch(urlScript, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: proyecto.id,
+          estado: "SOLICITADO",
+          columna: col
+        })
+      });
+
+      toastr.info("Solicitud de aprobación enviada 📤", "Solicitud registrada");
+      proyecto.estado = "SOLICITADO";
+      renderizarDetalle();
+    }
+  </script>
+
+$1
+<script src="https://cdn.jsdelivr.net/npm/toastr@2.1.4/build/toastr.min.js"></script>
+</body>
+</html>

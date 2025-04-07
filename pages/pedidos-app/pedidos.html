@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pedidos</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <link rel="stylesheet" href="css/estilos.css">
+</head>
+<body class="p-4">
+  <div class="container-fluid">
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <label for="filtroServicio" class="font-weight-bold">Filtrar por Servicio:</label>
+        <select id="filtroServicio" class="form-control">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <div class="col-md-6 d-flex align-items-end justify-content-end">
+        <button class="btn btn-primary shadow px-4 py-2" id="btnMostrarModal">
+          <i class="fas fa-check mr-2"></i>Asignar proyecto
+        </button>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-list mr-2"></i>Listado de Pedidos
+      </div>
+      <div class="card-body table-responsive">
+        <table class="table table-bordered" id="tablaPedidos">
+          <thead>
+            <tr>
+              <th>ID Lote</th>
+              <th>Servicio</th>
+              <th>MANZANA</th>
+              <th>LOTE</th>
+              <th>ESTADO DEL LOTE</th>
+              <th>Distancia a la red</th>
+              <th>Factibilidad Técnica</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Proyecto -->
+  <div id="modalContainer"></div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+  <script src="js/servicios.js"></script>
+  <script src="js/main.js"></script>
+</body>
+</html>

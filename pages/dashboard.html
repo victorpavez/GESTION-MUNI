@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard de Proyectos</title>
+
+  <!-- AdminLTE + Bootstrap + FontAwesome -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" />
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    .kpi-tab {
+      border-radius: 1.5rem;
+      padding: 0.8rem 1.5rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      font-size: 1rem;
+    }
+
+    .kpi-tab:hover {
+      opacity: 0.95;
+      transform: scale(1.05);
+    }
+
+    #botones-kpi {
+      gap: 1.5rem !important;
+      margin-bottom: 1rem;
+    }
+
+    #subfiltros-kpi {
+      gap: 0.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    #subfiltros-kpi button {
+      border-radius: 1rem;
+      padding: 0.4rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Contenido Principal -->
+  <div style="padding: 2rem; background-color: #f4f6f9;">
+    <section class="content pt-3">
+      
+
+        <!-- Sección KPI Pedidos -->
+        <div id="seccion-kpis-pedidos">
+          <div class="card mb-4">
+            <div class="card-header">
+              <h3 class="card-title">📦 KPI Pedidos</h3>
+            </div>
+            <div class="card-body">
+              <div class="row">
+  <div class="col-md-4">
+    <div class="info-box shadow bg-gradient-primary">
+      <span class="info-box-icon"><i class="fas fa-file-alt"></i></span>
+      <div class="info-box-content">
+        <span class="info-box-text">Total de Pedidos</span>
+        <span class="info-box-number" id="kpi-total-pedidos">--</span>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="info-box shadow bg-gradient-success">
+      <span class="info-box-icon"><i class="fas fa-link"></i></span>
+      <div class="info-box-content">
+        <span class="info-box-text">Pedidos con Proyecto</span>
+        <span class="info-box-number" id="kpi-con-proyecto">--</span>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="info-box shadow bg-gradient-warning">
+      <span class="info-box-icon"><i class="fas fa-hourglass-half"></i></span>
+      <div class="info-box-content">
+        <span class="info-box-text">Pedidos sin resolver</span>
+        <span class="info-box-number" id="kpi-sin-resolver">--</span>
+      </div>
+    </div>
+  </div>
+</div>
+            </div>
+          </div>
+        </div>
+        <!-- Sección KPIs -->
+        <div id="seccion-kpis">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">📊 KPI Proyecto</h3>
+            </div>
+            <div class="card-body">
+              <div class="mb-3 d-flex flex-wrap justify-content-start" id="botones-kpi">
+                <button class="btn btn-sm btn-primary kpi-tab" data-grupo="general"><i class="fas fa-layer-group"></i> General</button>
+                <button class="btn btn-sm btn-success kpi-tab" data-grupo="tiempo"><i class="fas fa-clock"></i> Tiempo</button>
+                <button class="btn btn-sm btn-warning kpi-tab" data-grupo="gestion"><i class="fas fa-cogs"></i> Gestión</button>
+                <button class="btn btn-sm btn-secondary kpi-tab" data-grupo="recursos"><i class="fas fa-users"></i> Carga Operativa</button>
+              </div>
+              <div id="subfiltros-kpi" class="mb-3 d-flex flex-wrap"></div>
+              <div class="row" id="kpis"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Sección Proyectos -->
+        <div id="seccion-proyecto">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">📋 Información de Proyectos</h3>
+              <div class="card-tools">
+                <input type="text" id="buscadorProyectos" class="form-control" placeholder="Buscar proyecto...">
+              </div>
+            </div>
+            <div class="card-body table-responsive p-0">
+              <table class="table table-hover text-nowrap" id="tablaProyectos">
+                <thead>
+                  <tr>
+                    <th>ID PROYECTO</th>
+                    <th>NOMBRE DEL PROYECTO</th>
+                    <th>TIPO</th>
+                    <th>FINANCIAMIENTO</th>
+                    <th>PRIORIDAD</th>
+                    <th>ETAPA ACTUAL</th>
+                  </tr>
+                </thead>
+                <tbody id="cuerpoTablaProyectos"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </div>
+
+  <script>
+    let datosProyectos = [];
+    let grupoActual = '';
+
+    async function cargarDatosProyectos() {
+      const url = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTihqbl1oVVb843wxW0VY-2QddNOV1xul_UIoXh79IciRRktrhECgyvXAGsoSDQiP4KHkUthDWzTtQb/pub?gid=0&single=true&output=csv';
+      const response = await fetch(url);
+      const data = await response.text();
+      const rows = data.trim().split('\n').map(r => r.split(','));
+      const headers = rows[0].map(h => h.trim());
+      datosProyectos = rows.slice(1).map(r => r.map(col => col.trim())).filter(r => r[0] !== headers[0]);
+      mostrarFilas(datosProyectos);
+    }
+
+    function mostrarFilas(filas) {
+      const indices = [0, 1, 2, 4, 6, 7];
+      const cuerpo = document.getElementById('cuerpoTablaProyectos');
+      cuerpo.innerHTML = '';
+      filas.forEach(cols => {
+        if (cols[0] === 'ID PROYECTO') return;
+        const fila = document.createElement('tr');
+        indices.forEach(i => {
+          const td = document.createElement('td');
+          td.textContent = cols[i] || '';
+          fila.appendChild(td);
+        });
+        cuerpo.appendChild(fila);
+      });
+    }
+
+    const subfiltros = {
+      general: ['Total', 'AREA TECNICA', 'Sectores externos', 'Ejecución', 'Finalizados'],
+      tiempo: ['Próximos', 'Retrasados'],
+      gestion: ['AREA TECNICA', 'ECONOMIA', 'IMUH', 'RO', 'PRENSA', 'LEGALES', 'CONTRATACIONES'],
+      recursos: ['Alta', 'Media', 'Baja']
+    };
+
+    function mostrarSubfiltros(grupo) {
+      grupoActual = grupo;
+      const contenedor = document.getElementById('subfiltros-kpi');
+      contenedor.innerHTML = '';
+      if (subfiltros[grupo]) {
+        subfiltros[grupo].forEach(nombre => {
+          const btn = document.createElement('button');
+          btn.className = 'btn btn-outline-dark btn-sm subfiltro-btn';
+          btn.setAttribute('data-subfiltro', nombre);
+          btn.textContent = nombre;
+          contenedor.appendChild(btn);
+        });
+      }
+    }
+
+    document.getElementById('botones-kpi').addEventListener('click', (e) => {
+      if (e.target.closest('.kpi-tab')) {
+        const grupo = e.target.closest('.kpi-tab').dataset.grupo;
+        mostrarSubfiltros(grupo);
+      }
+    });
+
+    document.getElementById('subfiltros-kpi').addEventListener('click', (e) => {
+      if (e.target.classList.contains('subfiltro-btn')) {
+        const subfiltro = e.target.dataset.subfiltro;
+        let filtrado = [];
+
+        if (grupoActual === 'general') {
+          if (subfiltro === 'Total') {
+            filtrado = datosProyectos;
+          } else {
+            filtrado = datosProyectos.filter(r => r[7].toLowerCase().includes(subfiltro.toLowerCase()));
+          }
+        }
+
+        mostrarFilas(filtrado);
+      }
+    });
+
+    document.addEventListener('DOMContentLoaded', cargarDatosProyectos);
+  </script>
+</body>
+</html>

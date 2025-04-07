@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pedidos</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body {
+      background-color: #ffffff;
+      color: #333;
+    }
+    .card {
+      background-color: rgba(255, 255, 255, 0.95);
+      border-radius: 1rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .card-header {
+      background-color: #4db6ac;
+      color: #fff;
+      font-weight: bold;
+      border-top-left-radius: 1rem;
+      border-top-right-radius: 1rem;
+    }
+    .table th {
+      background-color: #004d40;
+      color: white;
+    }
+    .table td {
+      background-color: #fff;
+      color: #333;
+    }
+    .btn-primary {
+      background-color: #00897b;
+      border: none;
+    }
+    .btn-primary:hover {
+      background-color: #00695c;
+    }
+  </style>
+</head>
+<body class="p-4">
+  <div class="container-fluid">
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <label for="filtroServicio" class="font-weight-bold">Filtrar por Servicio:</label>
+        <select id="filtroServicio" class="form-control">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <div class="col-md-6 d-flex align-items-end justify-content-end">
+        <button id="btnAsignarProyecto" class="btn btn-primary shadow px-4 py-2">
+          <i class="fas fa-check mr-2"></i>Crear proyecto
+        </button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-list mr-2"></i>Listado de Pedidos
+      </div>
+      <div class="card-body table-responsive">
+        <table class="table table-bordered" id="tablaPedidos">
+          <thead>
+            <tr>
+              <th>ID Lote</th>
+              <th>Servicio</th>
+              <th>MANZANA</th>
+              <th>LOTE</th>
+              <th>ESTADO DEL LOTE</th>
+              <th>Distancia a la red</th>
+              <th>Factibilidad Técnica</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vTXu9hF8AylQmuLY13LD7da3-kGq55-hYHOzJxJIYnYcox4JM7wUE_RBnb_436ljuM4EOAc_61HpxmW/pub?output=csv')
+        .then(res => res.text())
+        .then(text => {
+          const rows = text.trim().split('\n').map(r => r.split(','));
+          const headers = rows[0];
+          const data = rows.slice(1).map(r => Object.fromEntries(r.map((val, i) => [headers[i], val])));
+
+          const tbody = document.querySelector("#tablaPedidos tbody");
+          const filtro = document.getElementById("filtroServicio");
+          const servicios = new Set();
+
+          data.forEach(row => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${row['ID Lote']}</td>
+              <td>${row['Servicio']}</td>
+              <td>${row['MANZANA']}</td>
+              <td>${row['LOTE']}</td>
+              <td>${row['ESTADO DEL LOTE']}</td>
+              <td>${row['DISTANCIA APROXIMADA A LA RED']}</td>
+              <td>${row['PRE FACTIBILIDAD TECNICA']}</td>
+              <td class="text-center"><input type="checkbox"></td>
+            `;
+            tbody.appendChild(tr);
+            if (row['Servicio']) servicios.add(row['Servicio']);
+          });
+
+          servicios.forEach(serv => {
+            const opt = document.createElement("option");
+            opt.value = serv;
+            opt.textContent = serv;
+            filtro.appendChild(opt);
+          });
+
+          filtro.addEventListener("change", () => {
+            const val = filtro.value.toLowerCase();
+            document.querySelectorAll("#tablaPedidos tbody tr").forEach(row => {
+              row.style.display = val === "" || row.children[1].textContent.toLowerCase() === val ? "" : "none";
+            });
+          });
+        });
+    });
+    document.getElementById("btnAsignarProyecto").addEventListener("click", () => {
+    const seleccionados = Array.from(document.querySelectorAll("#tablaPedidos tbody tr input[type='checkbox']:checked"));
+    const ids = seleccionados.map(cb => cb.closest('tr').children[0].textContent.trim());
+    const servicios = seleccionados.map(cb => cb.closest('tr').children[1].textContent.trim());
+    if (ids.length === 0) {
+      alert("Seleccioná al menos un lote para asignar un proyecto.");
+      return;
+    }
+    const params = new URLSearchParams();
+    params.append("ids", ids.join(","));
+    params.append("servicios", [...new Set(servicios)].join(","));
+    window.location.href = `crearproyecto.html?${params.toString()}`;
+  });
+</script>
+</body>
+</html>

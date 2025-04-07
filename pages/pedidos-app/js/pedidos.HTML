@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pedidos</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/css/adminlte.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body {
+      background-color: #ffffff;
+      color: #333;
+    }
+    .card {
+      background-color: rgba(255, 255, 255, 0.95);
+      border-radius: 1rem;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    .card-header {
+      background-color: #4db6ac;
+      color: #fff;
+      font-weight: bold;
+      border-top-left-radius: 1rem;
+      border-top-right-radius: 1rem;
+    }
+    .table th {
+      background-color: #004d40;
+      color: white;
+    }
+    .table td {
+      background-color: #fff;
+      color: #333;
+    }
+    .btn-primary {
+      background-color: #00897b;
+      border: none;
+    }
+    .btn-primary:hover {
+      background-color: #00695c;
+    }
+  </style>
+</head>
+<body class="p-4">
+  <div class="container-fluid">
+    <div class="row mb-4">
+      <div class="col-md-6">
+        <label for="filtroServicio" class="font-weight-bold">Filtrar por Servicio:</label>
+        <select id="filtroServicio" class="form-control">
+          <option value="">Todos</option>
+        </select>
+      </div>
+      <div class="col-md-6 d-flex align-items-end justify-content-end">
+        <button class="btn btn-primary shadow px-4 py-2" id="btnMostrarModal">
+          <i class="fas fa-check mr-2"></i>Asignar proyecto
+        </button>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-header">
+        <i class="fas fa-list mr-2"></i>Listado de Pedidos
+      </div>
+      <div class="card-body table-responsive">
+        <table class="table table-bordered" id="tablaPedidos">
+          <thead>
+            <tr>
+              <th>ID Lote</th>
+              <th>Servicio</th>
+              <th>MANZANA</th>
+              <th>LOTE</th>
+              <th>ESTADO DEL LOTE</th>
+              <th>Distancia a la red</th>
+              <th>Factibilidad Técnica</th>
+              <th>Acción</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Proyecto -->
+  <div class="modal fade" id="modalProyecto" tabindex="-1" role="dialog" aria-labelledby="modalProyectoLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalProyectoLabel">Asignar nuevo proyecto</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <form id="formProyecto">
+            <div class="form-group">
+              <label for="nombreProyecto">Nombre del Proyecto</label>
+              <input type="text" class="form-control" id="nombreProyecto" required>
+            </div>
+            <div class="form-group">
+              <label for="clasificacionProyecto">Clasificación</label>
+              <select class="form-control" id="clasificacionProyecto"></select>
+            </div>
+            <div class="form-group">
+              <label for="financiamientoProyecto">Financiamiento</label>
+              <select class="form-control" id="financiamientoProyecto"></select>
+            </div>
+            <div class="form-group">
+              <label for="registroOposicionProyecto">Registro de Oposición</label>
+              <select class="form-control" id="registroOposicionProyecto"></select>
+            </div>
+            <div class="form-group">
+              <label for="prioridadProyecto">Prioridad</label>
+              <select class="form-control" id="prioridadProyecto"></select>
+            </div>
+            <div class="form-group">
+              <label for="asignadoProyecto">Asignado</label>
+              <select class="form-control" id="asignadoProyecto"></select>
+            </div>
+            <div class="form-group">
+              <label for="supervisorProyecto">Supervisor Técnico</label>
+              <select class="form-control" id="supervisorProyecto"></select>
+            </div>
+            <div class="form-group">
+              <label for="estadoProyecto">Estado del Proyecto</label>
+              <select class="form-control" id="estadoProyecto"></select>
+            </div>
+            <div class="form-group">
+              <label>Resumen de ID Lote seleccionados:</label>
+              <pre id="resumenSeleccionados" class="bg-light p-2 border rounded" style="max-height: 200px; overflow-y: auto;"></pre>
+            </div>
+            <div class="form-group">
+              <label for="tipoProyecto">Servicio</label>
+              <input type="text" class="form-control" id="tipoProyecto" readonly>
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <div id="spinnerProyecto" class="spinner-border text-success mr-2 d-none" role="status">
+            <span class="sr-only">Guardando...</span>
+          </div>
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+          <button type="button" class="btn btn-primary" onclick="guardarProyecto()">Guardar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/admin-lte@3.2/dist/js/adminlte.min.js"></script>
+  <script>
+    function cargarPedidos() {
+      fetch('https://docs.google.com/spreadsheets/d/e/2PACX-1vTXu9hF8AylQmuLY13LD7da3-kGq55-hYHOzJxJIYnYcox4JM7wUE_RBnb_436ljuM4EOAc_61HpxmW/pub?output=csv')
+        .then(res => res.text())
+        .then(text => {
+          const rows = text.trim().split('\n').map(r => r.split(','));
+          const headers = rows[0];
+          const data = rows.slice(1).map(r => Object.fromEntries(r.map((val, i) => [headers[i], val])));
+
+          const tbody = document.querySelector("#tablaPedidos tbody");
+          const serviciosSet = new Set();
+          tbody.innerHTML = "";
+
+          data.forEach((row, index) => {
+            if (!row['ID Lote']) return;
+
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${row['ID Lote']}</td>
+              <td>${row['Servicio']}</td>
+              <td>${row['MANZANA']}</td>
+              <td>${row['LOTE']}</td>
+              <td>${row['ESTADO DEL LOTE']}</td>
+              <td>${row['DISTANCIA APROXIMADA A LA RED']}</td>
+              <td>${row['PRE FACTIBILIDAD TECNICA']}</td>
+              <td class="text-center"><input type="checkbox" class="seleccion-checkbox" data-index="${index}"></td>
+            `;
+            tbody.appendChild(tr);
+
+            if (row['Servicio']) serviciosSet.add(row['Servicio']);
+          });
+
+          const select = document.getElementById("filtroServicio");
+          serviciosSet.forEach(serv => {
+            const opt = document.createElement("option");
+            opt.value = serv;
+            opt.textContent = serv;
+            select.appendChild(opt);
+          });
+        });
+    }
+
+    function filtrarTabla() {
+      const servicio = document.getElementById("filtroServicio").value.toLowerCase();
+      const filas = document.querySelectorAll("#tablaPedidos tbody tr");
+      filas.forEach(fila => {
+        const servicioFila = fila.cells[1].textContent.toLowerCase();
+        fila.style.display = !servicio || servicioFila.includes(servicio) ? "" : "none";
+      });
+    }
+
+    function cargarResponsables() {
+      fetch("https://docs.google.com/spreadsheets/d/e/2PACX-1vTihqbl1oVVb843wxW0VY-2QddNOV1xul_UIoXh79IciRRktrhECgyvXAGsoSDQiP4KHkUthDWzTtQb/pub?output=csv")
+        .then(res => res.text())
+        .then(text => {
+          const lines = text.trim().split('\n').map(r => r.split(','));
+          const headers = lines[0];
+          const columnas = headers.reduce((obj, h, i) => { obj[h] = i; return obj; }, {});
+          const campos = {
+            "CLASIFICACION": "clasificacionProyecto",
+            "FINANCIAMIENTO": "financiamientoProyecto",
+            "REGISTRO DE OPOSICION": "registroOposicionProyecto",
+            "PRIORIDAD": "prioridadProyecto",
+            "ASIGNADO": "asignadoProyecto",
+            "SUPERVISOR TECNICO": "supervisorProyecto",
+            "ESTADO DEL PROYECTO": "estadoProyecto"
+          };
+          Object.entries(campos).forEach(([columna, idElemento]) => {
+            const select = document.getElementById(idElemento);
+            const valores = [...new Set(lines.slice(1).map(r => r[columnas[columna]]).filter(v => v))];
+            select.innerHTML = '<option value="">Seleccionar</option>';
+            console.log("Valores para " + columna + ":", valores);
+            valores.forEach(v => {
+              const opt = document.createElement("option");
+              opt.value = v;
+              opt.textContent = v;
+              select.appendChild(opt);
+            });
+          });
+        });
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      cargarPedidos();
+      cargarResponsables();
+      document.getElementById("filtroServicio").addEventListener("change", filtrarTabla);
+      document.getElementById("btnMostrarModal").addEventListener("click", () => {
+        const seleccionados = Array.from(document.querySelectorAll(".seleccion-checkbox:checked"));
+        const ids = seleccionados.map(cb => cb.closest('tr').children[0].textContent.trim());
+
+        let servicio = "";
+        if (seleccionados.length > 0) {
+          servicio = seleccionados[0].closest('tr').children[1].textContent.trim();
+        }
+
+        const resumen = ids.length > 0 ? ids.join("<br>") : "No hay ningún lote seleccionado.";
+        document.getElementById("resumenSeleccionados").innerHTML = resumen;
+        document.getElementById("tipoProyecto").value = servicio || "";
+        $('#modalProyecto').modal('show');
+      });
+    });
+  </script>
+</body>
+</html>

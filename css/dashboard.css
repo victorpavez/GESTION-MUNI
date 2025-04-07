@@ -1,0 +1,36 @@
+.kpi-tab {
+      border-radius: 1.5rem;
+      padding: 0.8rem 1.5rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      transition: all 0.3s ease;
+      font-size: 1rem;
+    }
+
+    .kpi-tab:hover {
+      opacity: 0.95;
+      transform: scale(1.05);
+    }
+
+    #botones-kpi {
+      gap: 1.5rem !important;
+      margin-bottom: 1rem;
+    }
+
+    #subfiltros-kpi {
+      gap: 0.8rem;
+      margin-bottom: 1.5rem;
+    }
+
+    #subfiltros-kpi button {
+      border-radius: 1rem;
+      padding: 0.4rem 1rem;
+      font-size: 0.85rem;
+      font-weight: 500;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
